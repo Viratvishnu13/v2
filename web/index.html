@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launcher</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/powershell/powershell.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="psadt.css">
+</head>
+<body>
+    <input type="file" id="imageUploadInput" class="hidden" accept="image/*">
+    <div class="app-container">
+        <header class="header" data-tauri-drag-region>
+            <div class="title-bar">
+                <div class="title-bar-left">
+                    <button class="menu-button" id="menuButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" x2="20" y1="6" y2="6"/>
+                            <line x1="4" x2="20" y1="12" y2="12"/>
+                            <line x1="4" x2="20" y1="18" y2="18"/>
+                        </svg>
+                    </button>
+                    <h1 class="app-title">Launcher</h1>
+                </div>
+                
+                <div class="title-bar-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                        <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="window-controls">
+                        <button class="window-control minimize" id="minimizeButton" title="Minimize">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <path d="M2 5H8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <button class="window-control maximize" id="maximizeButton" title="Maximize">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="1" fill="none"/>
+                            </svg>
+                        </button>
+                        <button class="window-control close" id="closeButton" title="Close">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <path d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="breadcrumb">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9,18 15,12 9,6"/>
+                </svg>
+                <span id="currentView">Packager Tasks</span>
+                <span id="taskBreadcrumb" class="breadcrumb-item hidden">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                    <span id="taskName"></span>
+                </span>
+                <span id="optionBreadcrumb" class="breadcrumb-item hidden">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                    <span id="optionName"></span>
+                </span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <nav class="navigation-sidebar" id="navigationSidebar">
+                <div class="nav-items">
+                    <div class="nav-item active" data-view="packager-tasks">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16.5 9.4 7.55 4.24"/>
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.29,7 12,12 20.71,7"/>
+                            <line x1="12" x2="12" y1="22" y2="12"/>
+                        </svg>
+                        <span>Packager Tasks</span>
+                    </div>
+                    <div class="nav-item" data-view="devops-tasks">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="6" x2="6" y1="3" y2="15"/>
+                            <circle cx="18" cy="6" r="3"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <path d="m18 9 2.5-2.5L18 4"/>
+                        </svg>
+                        <span>DevOps Tasks</span>
+                    </div>
+                    <div class="nav-item" data-view="tools">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        <span>Tools</span>
+                    </div>
+                    <div class="nav-item" data-view="recent">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                        </svg>
+                        <span>Recent</span>
+                    </div>
+                    <div class="nav-item" data-view="favourites">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                        </svg>
+                        <span>Favourites</span>
+                    </div>
+                </div>
+
+                <div class="bottom-nav">
+                    <div class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                        </svg>
+                        <span>Settings</span>
+                    </div>
+                    <div class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <path d="M12 17h.01"/>
+                        </svg>
+                        <span>Help</span>
+                    </div>
+                    <div class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16,17 21,12 16,7"/>
+                            <line x1="21" x2="9" y1="12" y2="12"/>
+                        </svg>
+                        <span>Quit</span>
+                        <span class="shortcut">Alt+A</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content-area">
+                <div class="columns-container">
+                    <div class="tasks-column">
+                        <div id="packagerTasksView" class="task-view">
+                            <div class="task-item" data-task="create-package">
+                                <div class="task-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16.5 9.4 7.55 4.24"/>
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                        <polyline points="3.29,7 12,12 20.71,7"/>
+                                        <line x1="12" x2="12" y1="22" y2="12"/>
+                                    </svg>
+                                    <span>Create Package</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="task-item" data-task="edit-package">
+                                <div class="task-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                        <path d="m15 5 4 4"/>
+                                    </svg>
+                                    <span>Edit Package</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="task-item" data-task="test-package">
+                                <div class="task-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                                        <polyline points="14,2 14,8 20,8"/>
+                                        <path d="M10.4 17.6s1.2-1.6 2.6-1.6 2.6 1.6 2.6 1.6"/>
+                                        <path d="M15 13.4s-2-2.4-3-2.4-3 2.4-3 2.4"/>
+                                    </svg>
+                                    <span>Test Package</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="task-item" data-task="prepare-deployment">
+                                <div class="task-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" x2="12" y1="15" y2="3"/>
+                                    </svg>
+                                    <span>Prepare for Deployment</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="task-item" data-task="document-package">
+                                <div class="task-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                                        <path d="M10 9H8"/>
+                                        <path d="M16 13H8"/>
+                                        <path d="M16 17H8"/>
+                                    </svg>
+                                    <span>Document Package</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="otherTasksView" class="task-view hidden">
+                            <div class="coming-soon">
+                                <span id="comingSoonText">Coming soon...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="options-column">
+                        <div id="createPackageOptions" class="options-view hidden">
+                            <div class="option-item" data-option="ps1">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="4,17 10,11 4,5"/>
+                                        <line x1="12" x2="20" y1="19" y2="19"/>
+                                    </svg>
+                                    <span>PS1</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="option-item" data-option="intunewin">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+                                        <path d="M12 18h.01"/>
+                                    </svg>
+                                    <span>IntuneWin</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="option-item psadt-option" data-option="psadt">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                    </svg>
+                                    <span>PSAppDeployToolkit</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="editPackageOptions" class="options-view hidden">
+                            <div class="option-item" data-option="edit-ps1">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="4,17 10,11 4,5"/>
+                                        <line x1="12" x2="20" y1="19" y2="19"/>
+                                    </svg>
+                                    <span>PS1</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="option-item psadt-option" data-option="edit-psadt">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                    </svg>
+                                    <span>PSAppDeployToolkit</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="testPackageOptions" class="options-view hidden">
+                            <div class="option-item" data-option="test-ps1">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="4,17 10,11 4,5"/>
+                                        <line x1="12" x2="20" y1="19" y2="19"/>
+                                    </svg>
+                                    <span>PS1</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                            <div class="option-item psadt-option" data-option="test-psadt">
+                                <div class="option-content">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                    </svg>
+                                    <span>PSAppDeployToolkit</span>
+                                </div>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9,18 15,12 9,6"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="emptyOptions" class="empty-state">
+                            <span id="emptyStateText">Select a task</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-footer">
+                    <div class="recent-header">
+                        <h2>Recent</h2>
+                    </div>
+                    <div class="recent-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" data-tab="tasks">Tasks</button>
+                            <button class="tab-button" data-tab="files">Files</button>
+                        </div>
+                        
+                        <div class="tab-content" id="tasksTab">
+                            <div class="recent-grid">
+                                <div class="recent-item">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16.5 9.4 7.55 4.24"/>
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                        <polyline points="3.29,7 12,12 20.71,7"/>
+                                        <line x1="12" x2="12" y1="22" y2="12"/>
+                                    </svg>
+                                    <div class="recent-item-content">
+                                        <div class="recent-task">Create Package</div>
+                                        <div class="recent-tool">→ PSAppDeployToolkit</div>
+                                    </div>
+                                </div>
+                                <div class="recent-item">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16.5 9.4 7.55 4.24"/>
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                        <polyline points="3.29,7 12,12 20.71,7"/>
+                                        <line x1="12" x2="12" y1="22" y2="12"/>
+                                    </svg>
+                                    <div class="recent-item-content">
+                                        <div class="recent-task">Create Package</div>
+                                        <div class="recent-tool">→ IntuneWin</div>
+                                    </div>
+                                </div>
+                                <div class="recent-item">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                        <path d="m15 5 4 4"/>
+                                    </svg>
+                                    <div class="recent-item-content">
+                                        <div class="recent-task">Edit Package</div>
+                                        <div class="recent-tool">→ PSAppDeployToolkit</div>
+                                    </div>
+                                </div>
+                                <div class="recent-item">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                                        <polyline points="14,2 14,8 20,8"/>
+                                        <path d="M10.4 17.6s1.2-1.6 2.6-1.6 2.6 1.6 2.6 1.6"/>
+                                        <path d="M15 13.4s-2-2.4-3-2.4-3 2.4-3 2.4"/>
+                                    </svg>
+                                    <div class="recent-item-content">
+                                        <div class="recent-task">Test Package</div>
+                                        <div class="recent-tool">→ PS1</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content hidden" id="filesTab">
+                            <div class="files-grid">
+                                <div class="file-item">
+                                    <div class="file-path">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                        </svg>
+                                        <span>C:\PKG\PKG-20250710-174318</span>
+                                    </div>
+                                    <div class="file-type">PSADT</div>
+                                </div>
+                                <div class="file-item">
+                                    <div class="file-path">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                        </svg>
+                                        <span>C:\PKG\VKG-20250710-165528</span>
+                                    </div>
+                                    <div class="file-type">PSADT</div>
+                                </div>
+                                <div class="file-item">
+                                    <div class="file-path">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                        </svg>
+                                        <span>C:\PKG\EDI-20250710-142211</span>
+                                    </div>
+                                    <div class="file-type">MSI</div>
+                                </div>
+                                <div class="file-item">
+                                    <div class="file-path">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                        </svg>
+                                        <span>C:\PKG\TST-20250710-135445</span>
+                                    </div>
+                                    <div class="file-type">PS1</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="psadtModal" class="modal-overlay hidden">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16.5 9.4 7.55 4.24"/>
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.29,7 12,12 20.71,7"/>
+                        <line x1="12" x2="12" y1="22" y2="12"/>
+                    </svg>
+                    <span class="modal-title">New package</span>
+                </div>
+                <div class="modal-controls">
+                    <button class="modal-control minimize" title="Minimize">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M2 5H8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <button class="modal-control maximize" title="Maximize">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="1" fill="none"/>
+                        </svg>
+                    </button>
+                    <button class="modal-control close" id="modalCloseButton" title="Close">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-content">
+                <div class="template-option">
+                    <div class="radio-group">
+                        <input type="radio" id="customTemplate" name="template" value="custom" checked>
+                        <label for="customTemplate">Custom template</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="templateSelect" class="form-label">Template</label>
+                    <div class="select-wrapper">
+                        <select id="templateSelect" class="form-select">
+                            <option value="corplist">corplist (Version 3.10.2)</option>
+                            <option value="standard">standard (Version 3.9.0)</option>
+                            <option value="minimal">minimal (Version 3.8.4)</option>
+                        </select>
+                        <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6,9 12,15 18,9"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="packageLocation" class="form-label">Package location</label>
+                    <div class="input-group">
+                        <input type="text" id="packageLocation" class="form-input" value="C:\PKG\PKG-20250722-213200" readonly>
+                        <button type="button" class="browse-button">Browse...</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="modal-button primary" id="createPackageButton">Create</button>
+                <button type="button" class="modal-button secondary" id="cancelButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="packageWrapperWindow" class="package-wrapper-window hidden">
+        <div class="package-wrapper-header" id="packageWrapperHeader">
+            <div class="package-wrapper-title-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16.5 9.4 7.55 4.24"/>
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.29,7 12,12 20.71,7"/>
+                    <line x1="12" x2="12" y1="22" y2="12"/>
+                </svg>
+                <span class="package-wrapper-title">Package Wrapper - PKG-20250722-212050</span>
+            </div>
+            <div class="package-wrapper-version">PSADT version: 3.10.2</div>
+            <div class="header-search">
+                <input type="search" placeholder="Search...">
+            </div>
+            <div class="modal-controls">
+                <button class="modal-control minimize" title="Minimize">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5H8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <button class="modal-control maximize" title="Maximize">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <rect x="2" y="2" width="6" height="6" stroke="currentColor" stroke-width="1" fill="none"/>
+                    </svg>
+                </button>
+                <button class="modal-control close" id="packageWrapperCloseButton" title="Close">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="package-wrapper-tabs">
+            <button class="package-tab active" data-package-tab="general">General</button>
+            <button class="package-tab" data-package-tab="designer">Package Designer</button>
+            <button class="package-tab" data-package-tab="configuration">Configuration</button>
+        </div>
+
+        <div class="package-wrapper-content">
+            <div id="generalTab" class="package-tab-content">
+                <div class="package-section" id="packageAppearanceSection">
+                    <h3 class="package-section-title">Package Appearance</h3>
+                    <div class="package-appearance-grid">
+                        <div class="package-banner">
+                            <div class="package-image-container">
+                                <div class="package-banner-logo">
+                                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                                        <path d="M20 20L50 10L80 20L50 30Z" fill="#4285f4"/>
+                                        <path d="M20 40L50 30L80 40L50 50Z" fill="#0066cc"/>
+                                        <path d="M20 60L50 50L80 60L50 70Z" fill="#333"/>
+                                    </svg>
+                                    <span class="logo-ps">PS</span><span class="logo-app">App</span><span class="logo-deploy">Deploy</span><span class="logo-toolkit">Toolkit</span>
+                                </div>
+                                <div class="package-edit-overlay" id="editBannerButton">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                        <path d="m15 5 4 4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">Banner</span>
+                        </div>
+                        
+                        <div class="package-icon-box">
+                            <div class="package-image-container">
+                                <div class="package-icon-placeholder">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17,8 12,3 7,8"/>
+                                        <line x1="12" x2="12" y1="3" y2="15"/>
+                                    </svg>
+                                </div>
+                                <div class="package-edit-overlay" id="editIconButton">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                        <path d="m15 5 4 4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">Icon</span>
+                        </div>
+                        
+                        <div class="package-logo-box">
+                            <div class="package-image-container">
+                                <div class="package-logo-placeholder">
+                                    <svg class="package-logo-svg" width="48" height="48" viewBox="0 0 100 100" fill="none">
+                                        <path d="M20 20L50 10L80 20L50 30Z" fill="#4285f4"/>
+                                        <path d="M20 40L50 30L80 40L50 50Z" fill="#0066cc"/>
+                                        <path d="M20 60L50 50L80 60L50 70Z" fill="#333"/>
+                                    </svg>
+                                </div>
+                                <div class="package-edit-overlay" id="editLogoButton">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                        <path d="m15 5 4 4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">Logo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="package-section">
+                    <h3 class="package-section-title">Package Identity</h3>
+                    <div class="package-identity-grid" id="packageIdentityGrid">
+                        <div class="package-field" data-field="name">
+                            <label for="pkg-name" class="package-field-label">Name</label>
+                            <input type="text" id="pkg-name" class="package-field-input" value="None" readonly>
+                        </div>
+                        <div class="package-field" data-field="revision">
+                            <label for="pkg-revision" class="package-field-label">Revision</label>
+                            <input type="text" id="pkg-revision" class="package-field-input" value="01" readonly>
+                        </div>
+                        <div class="package-field" data-field="vendor">
+                            <label for="pkg-vendor" class="package-field-label">Vendor</label>
+                            <input type="text" id="pkg-vendor" class="package-field-input" value="None" readonly>
+                        </div>
+                        <div class="package-field" data-field="script-version">
+                            <label for="pkg-script-version" class="package-field-label">Script version</label>
+                            <input type="text" id="pkg-script-version" class="package-field-input" value="1.0.0" readonly>
+                        </div>
+                        <div class="package-field" data-field="version">
+                            <label for="pkg-version" class="package-field-label">Version</label>
+                            <input type="text" id="pkg-version" class="package-field-input" value="None" readonly>
+                        </div>
+                        <div class="package-field" data-field="script-date">
+                            <label for="pkg-script-date" class="package-field-label">Script date</label>
+                            <input type="text" id="pkg-script-date" class="package-field-input" value="22.07.2025" readonly>
+                        </div>
+                        <div class="package-field" data-field="architecture">
+                            <label for="pkg-architecture" class="package-field-label">Architecture</label>
+                            <input type="text" id="pkg-architecture" class="package-field-input" value="None" readonly>
+                        </div>
+                        <div class="package-field" data-field="script-author">
+                            <label for="pkg-script-author" class="package-field-label">Script author</label>
+                            <input type="text" id="pkg-script-author" class="package-field-input" value="CKED01" readonly>
+                        </div>
+                        <div class="package-field" data-field="language">
+                            <label for="pkg-language" class="package-field-label">Language</label>
+                            <input type="text" id="pkg-language" class="package-field-input" value="EN" readonly>
+                        </div>
+                    </div>
+                    <div class="package-identity-actions">
+                        <button class="package-edit-button" id="packageEditButton">Edit</button>
+                        <button type="button" class="modal-button primary hidden" id="packageSaveButton">Save</button>
+                        <button type="button" class="modal-button secondary hidden" id="packageCancelButton">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="designerTab" class="package-tab-content hidden">
+                <div class="package-designer-layout">
+                    <div class="designer-sidebar">
+                        <ul class="designer-tree">
+                            <li>
+                                <div class="tree-item" data-id="files" data-view="explorer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20z"/></svg>
+                                    <span>Files</span>
+                                </div>
+                                <ul class="tree-submenu">
+                                    <li><div class="tree-item" data-id="installation" data-view="explorer"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12.1 18.55q-1.9 0-3.325-1.1T6.8 14.9l.65-.65q.35.85 1 1.475t1.6.625q1.15 0 1.8-.675t.65-1.875q0-1.05-.625-1.725T10.3 11.5q-1.35 0-2.25.775T7.1 14.2L6.4 13.5q.3-.95 1.075-1.65T9.4 11.1q.35-.2.7-.3t.7-.1q1.45 0 2.5.8t1.05 2.15q0 1-.45 1.825t-1.25 1.325q-.7.4-1.55.6t-1.65.2m-1.3-8.05l-1.45-1.45L11.5 6.9l2.15 2.15l-1.45 1.45L10.05 8.35zM6 22q-.825 0-1.412-.587T4 20V4q0-.825.588-1.412T6 2h8l6 6v12q0 .825-.587 1.413T18 22z"/></svg><span>Installation</span></div></li>
+                                    <li><div class="tree-item active" data-id="support" data-view="explorer"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12.1 18.55q-1.9 0-3.325-1.1T6.8 14.9l.65-.65q.35.85 1 1.475t1.6.625q1.15 0 1.8-.675t.65-1.875q0-1.05-.625-1.725T10.3 11.5q-1.35 0-2.25.775T7.1 14.2L6.4 13.5q.3-.95 1.075-1.65T9.4 11.1q.35-.2.7-.3t.7-.1q1.45 0 2.5.8t1.05 2.15q0 1-.45 1.825t-1.25 1.325q-.7.4-1.55.6t-1.65.2m-1.3-8.05l-1.45-1.45L11.5 6.9l2.15 2.15l-1.45 1.45L10.05 8.35zM6 22q-.825 0-1.412-.587T4 20V4q0-.825.588-1.412T6 2h8l6 6v12q0 .825-.587 1.413T18 22z"/></svg><span>Support files</span></div></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item" data-id="actions" data-view="editor">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20z"/></svg>
+                                    <span>Actions</span>
+                                </div>
+                                <ul class="tree-submenu">
+                                    <li><div class="tree-item" data-id="pre-install" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Pre-Install</span></div></li>
+                                    <li><div class="tree-item" data-id="install" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Install</span></div></li>
+                                    <li><div class="tree-item" data-id="post-install" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Post-Install</span></div></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <div class="tree-item" data-id="repair" data-view="editor">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20z"/></svg>
+                                    <span>Repair</span>
+                                </div>
+                                <ul class="tree-submenu">
+                                    <li><div class="tree-item" data-id="pre-repair" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Pre-Repair</span></div></li>
+                                    <li><div class="tree-item" data-id="repair-action" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Repair</span></div></li>
+                                    <li><div class="tree-item" data-id="post-repair" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Post-Repair</span></div></li>
+                                </ul>
+                            </li>
+                             <li>
+                                <div class="tree-item" data-id="uninstall" data-view="editor">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h6l2 2h8q.825 0 1.413.588T22 8v10q0 .825-.587 1.413T20 20z"/></svg>
+                                    <span>Uninstall</span>
+                                </div>
+                                <ul class="tree-submenu">
+                                    <li><div class="tree-item" data-id="pre-uninstall" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Pre-Uninstall</span></div></li>
+                                    <li><div class="tree-item" data-id="uninstall-action" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Uninstall</span></div></li>
+                                    <li><div class="tree-item" data-id="post-uninstall" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20l-1.425-1.4l5.6-5.6H4v-2h12.175l-5.6-5.6L12 4l8 8z"/></svg><span>Post-Uninstall</span></div></li>
+                                </ul>
+                            </li>
+                            <li><div class="tree-item" data-id="raw-script" data-view="editor"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6l6 6zM14.6 16.6l4.6-4.6l-4.6-4.6L16 6l6 6l-6 6z"/></svg><span>Raw deployment script</span></div></li>
+                        </ul>
+                    </div>
+                    <div id="designerContent" class="designer-content">
+                        <div id="fileExplorerView">
+                             <div class="designer-content-header">
+                                <h4 id="designerContentTitle">Primary Installation Files</h4>
+                                <div class="header-right">
+                                    <span id="fileCount">0 files (0 Bytes)</span>
+                                    <button id="collapseAllBtn" class="designer-header-btn">Collapse all</button>
+                                </div>
+                            </div>
+                            <div class="file-explorer">
+                                <table class="designer-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Size</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fileListBody"></tbody>
+                                </table>
+                            </div>
+                            <div id="importSection" class="import-section hidden">
+                                <label for="importPath">Import files</label>
+                                <input type="text" id="importPath" value="Folder">
+                            </div>
+                            <div class="designer-footer">
+                                <div class="footer-buttons">
+                                    <div class="split-button">
+                                        <button id="addFileBtn" class="designer-footer-btn">Add</button>
+                                        <button id="addFileOptionsBtn" class="designer-footer-btn split-button-arrow">^</button>
+                                    </div>
+                                    <button id="deleteFileBtn" class="designer-footer-btn">Delete</button>
+                                </div>
+                                <div class="footer-warning">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.138T12 2q2.075 0 3.9.788t3.175 2.138q1.35 1.35 2.137 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.137T12 22m-1-5h2v-2h-2zm0-4h2V7h-2z"/></svg>
+                                    <span>Changes directly affect the file system of the package and cannot be undone.</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="codeEditorView" class="hidden">
+                             <div class="designer-content-header">
+                                <h4 id="codeEditorTitle">Pre-Installation Actions</h4>
+                                <div class="header-right">
+                                     <button id="viewBtn" class="designer-header-btn">View</button>
+                                </div>
+                            </div>
+                            <textarea id="codeEditor"></textarea>
+                            <div class="designer-footer">
+                                <div class="footer-buttons">
+                                    <button id="addCodeBtn" class="designer-footer-btn">Add</button>
+                                    <button id="recentBtn" class="designer-footer-btn">Recent</button>
+                                    <button id="helpBtn" class="designer-footer-btn">Help</button>
+                                </div>
+                                <div class="footer-status">
+                                    <span id="errorCount">0 errors</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="configurationTab" class="package-tab-content hidden">
+                 <div class="package-section">
+                    <h3 class="package-section-title">Configuration</h3>
+                    <p style="color: var(--muted-foreground);">Configuration options will be available here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="psadt.js"></script>
+    <script type="module" src="script.js"></script> 
+</body>
+</html>

@@ -1,0 +1,505 @@
+/* PSAppDeployToolkit Package Wrapper Window */
+.package-wrapper-window {
+  position: absolute; 
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: auto;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  max-width: 1100px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* Draggable Header */
+.package-wrapper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--card);
+  cursor: move;
+}
+
+.package-wrapper-title-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.package-wrapper-title {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+}
+
+.package-wrapper-version {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-left: 1rem;
+}
+
+.header-search {
+    margin-left: auto;
+    margin-right: 1rem;
+}
+
+.header-search input {
+    background-color: var(--input-background);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    width: 200px;
+}
+
+/* Tabs */
+.package-wrapper-tabs {
+  display: flex;
+  background-color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.package-tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.package-tab.active {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-bottom-color: var(--primary);
+}
+
+.package-tab:hover:not(.active) {
+  background-color: var(--accent);
+}
+
+/* Main Content Area */
+.package-wrapper-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Changed from overflow-y */
+  min-height: 0;
+}
+
+/* General Tab */
+#generalTab {
+    padding: 1.5rem;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.package-section {
+  margin-bottom: 2rem;
+}
+
+.package-section-title {
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+  margin-bottom: 1rem;
+}
+
+.package-appearance-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.package-banner, .package-icon-box, .package-logo-box {
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card);
+  min-height: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.package-banner-logo {
+  font-size: 1.25rem;
+}
+
+.package-image-container {
+    position: relative;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.package-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.package-section.edit-mode .package-image-container:hover .package-edit-overlay {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.package-edit-overlay svg {
+    color: white;
+    width: 24px;
+    height: 24px;
+}
+
+
+.package-icon-placeholder, .package-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.package-logo-svg {
+  transform: rotate(-15deg);
+}
+
+.package-identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+}
+
+.package-field-label {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.package-field-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background-color: var(--input-background);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.package-field-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--ring);
+}
+
+.package-field-input:read-only {
+    padding: 0.5rem 0;
+    border-color: transparent;
+    background-color: transparent;
+    font-style: italic;
+    color: var(--muted-foreground);
+    cursor: default;
+    box-shadow: none;
+}
+
+.package-identity-grid.edit-mode .package-field[data-field="language"] {
+    grid-column: 1 / -1;
+}
+
+.package-identity-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.package-edit-button {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.package-edit-button:hover {
+  background-color: var(--accent);
+}
+
+.dark .package-edit-button {
+    background-color: var(--muted);
+    border-color: var(--border);
+}
+
+.dark .package-edit-button:hover {
+    background-color: var(--accent);
+}
+
+/* This ensures the tab content fills the space */
+.package-tab-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+#designerTab {
+    padding: 0; /* Remove padding from the tab itself */
+}
+
+.package-designer-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.designer-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.designer-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.tree-item:hover {
+    background-color: var(--accent);
+}
+
+.tree-item.active {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.tree-submenu {
+    list-style: none;
+    padding-left: 1.5rem;
+}
+
+.designer-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.designer-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.designer-content-header h4 {
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+}
+
+.designer-header-btn {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.file-explorer {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+
+.designer-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.designer-table th, .designer-table td {
+    text-align: left;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.designer-table th {
+    color: var(--muted-foreground);
+    font-weight: var(--font-weight-normal);
+    border-bottom: 1px solid var(--border);
+}
+
+.file-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.import-section {
+    padding: 0.75rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background-color: var(--accent);
+    flex-shrink: 0;
+}
+.import-section label {
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+.import-section input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    background-color: var(--background);
+}
+
+
+.designer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+    flex-shrink: 0;
+}
+
+.footer-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.designer-footer-btn {
+    background-color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.split-button {
+    display: flex;
+}
+.split-button button:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+.split-button-arrow {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 0.5rem 0.5rem;
+}
+
+.dark .designer-footer-btn {
+    background-color: var(--secondary);
+}
+
+.footer-warning, .footer-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+}
+
+/* Code Editor */
+#codeEditorView {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.CodeMirror {
+    flex-grow: 1;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+    /* The overflow: auto is implicitly handled by CodeMirror's own JS */
+}
+
+/* CodeMirror Theme Overrides for Light/Dark mode */
+.cm-s-dracula.CodeMirror {
+    background: var(--card);
+    color: var(--foreground);
+    border-color: var(--border);
+}
+.dark .cm-s-dracula.CodeMirror {
+     background: #282a36;
+     color: #f8f8f2;
+}
+.cm-s-dracula .CodeMirror-gutters {
+    background: var(--muted);
+    border-right: 1px solid var(--border);
+}
+.dark .cm-s-dracula .CodeMirror-gutters {
+    background: #282a36;
+    border-right: 1px solid #44475a;
+}
+.cm-s-dracula .CodeMirror-cursor {
+    border-left: 1px solid var(--foreground);
+}
+.dark .cm-s-dracula .CodeMirror-cursor {
+    border-left: 1px solid #f8f8f0;
+}
